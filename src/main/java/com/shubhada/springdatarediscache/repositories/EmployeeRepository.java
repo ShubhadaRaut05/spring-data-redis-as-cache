@@ -1,6 +1,7 @@
 package com.shubhada.springdatarediscache.repositories;
 
 import com.shubhada.springdatarediscache.models.Employee;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -8,8 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class EmployeeRepository {
-    private HashOperations hashOperations;
+public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
+   /* private HashOperations hashOperations;
     private RedisTemplate redisTemplate;
 
     public EmployeeRepository(RedisTemplate redisTemplate) {
@@ -33,5 +34,5 @@ public class EmployeeRepository {
     public void delete(int id){
         hashOperations.delete("EMPLOYEE",id);
 
-    }
+    }*/
 }

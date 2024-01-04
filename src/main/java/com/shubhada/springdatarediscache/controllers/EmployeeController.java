@@ -1,11 +1,17 @@
 package com.shubhada.springdatarediscache.controllers;
 
+import com.shubhada.springdatarediscache.exceptions.ResourceNotFoundException;
 import com.shubhada.springdatarediscache.models.Employee;
 import com.shubhada.springdatarediscache.services.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -19,20 +25,29 @@ public class EmployeeController {
         return employeeService.saveEmployee(employee);
     }
     @GetMapping("/employees")
-    public List<Employee> findAll(){
-        return employeeService.findAll();
+    public ResponseEntity<List<Employee>> findAll(){
+
+        return ResponseEntity.ok(employeeService.findAll());
     }
     @GetMapping("/employees/{id}")
-    public Employee findById(@PathVariable("id") int id){
-
-        return employeeService.findById(id);
+    @Cacheable(value="employees",key="#id")
+    public Optional<Employee> findById(@PathVariable("id") int id) throws ResourceNotFoundException {
+        try {
+            return employeeService.findById(id);
+        } catch (ResourceNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
-    @PutMapping("/employees")
-    public void update(@RequestBody Employee employee){
-        employeeService.update(employee);
+    @PutMapping("/employees/{id}")
+    @CachePut(value="employees",key="#id")
+    public Employee update(@RequestBody Employee employee,@PathVariable int id) throws ResourceNotFoundException {
+
+       return  employeeService.update(employee,id);
     }
     @DeleteMapping("/employees/{id}")
-    public void delete(@PathVariable int id){
+    @CacheEvict(value="employees",allEntries = true)
+    public void delete(@PathVariable int id) throws ResourceNotFoundException {
+
         employeeService.delete(id);
     }
 
